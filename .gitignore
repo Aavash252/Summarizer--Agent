@@ -1,0 +1,25 @@
+# Python virtual envs
+venv/
+.env/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter cache
+.ipynb_checkpoints/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.so
+*.dll
+
+# IDE configs
+.vscode/
+.idea/
