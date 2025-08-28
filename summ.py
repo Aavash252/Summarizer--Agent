@@ -195,6 +195,27 @@ if __name__ == "__main__":
     try:
         result = analyze_article(article_text, title, frt_date)
         #print (result)
+        result = analyze_article(article_text, title, frt_date)
+
+        # Open a text file to write the output
+        with open("analysis_output.txt", "w", encoding="utf-8") as file:
+            # Write header
+            file.write("-------------------\n")
+            file.write("Analysis Complete:\n")
+            file.write(f"TITLE: {title}\n")
+            file.write(f"Published Date: {frt_date}\n")
+            file.write(f"CATEGORY: {result['category']}\n\n")
+
+            # Write summary points
+            file.write("SUMMARY:\n")
+            for point in result["summary_points"]:
+                file.write(f"- {point}\n")
+
+            # Write sentiment
+            file.write(f"\nSENTIMENT: {result['sentiment']}\n")
+            file.write("-------------------\n")
+
+        print("✅ Analysis results saved to 'analysis_output.txt'")
 
         print("\n-------------------")
         print("Analysis Complete:")
