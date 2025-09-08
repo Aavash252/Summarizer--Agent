@@ -1,0 +1,21 @@
+--- NEWS ANALYSIS REPORT (4 ARTICLES) (Source: FILE) ---
+
+--- Article 1 (Source: news1.txt) ---
+- Point:     Celtic lose Champions League qualifier to Kairat in penalty shootout after failing to score in 210 minutes
+- Category:  Sports
+- Sentiment: Negative
+
+--- Article 2 (Source: news3.txt) ---
+- Point:     Barcelona's financial issues prevent Marcus Rashford from being officially registered for La Liga competitions despite his loan deal.
+- Category:  Sports
+- Sentiment: Negative
+
+--- Article 3 (Source: news2.txt) ---
+- Point:     West Ham captain Jarrod Bowen apologises for confronting fans after team's EFL Cup loss
+- Category:  Sports
+- Sentiment: Negative
+
+--- Article 4 (Source: news4.txt) ---
+- Point:     Liverpool's 16-year-old Rio Ngumoha scores 100th-minute winner in 3-2 win over Newcastle despite 10 men
+- Category:  Sports
+- Sentiment: Negative
