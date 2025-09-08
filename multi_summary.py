@@ -1,4 +1,3 @@
-# --- imports ---
 import os
 import time
 from langchain_core.output_parsers import JsonOutputParser
@@ -9,31 +8,62 @@ from langchain_ollama import ChatOllama
 from tools import get_text_from_file,write_summary_to_file,get_text_from_url
 
 
-# --- shared LLM (JSON mode) ---
 llm_json = ChatOllama(model="qwen3:4b", format="json", temperature=0)
 
-# Per-Article Single Key Point
 class OnePointOut(BaseModel):
     key_point: str = Field(description="ONE concise, headline-style bullet point for this article.")
-onept_system_prompt = "You are a professional news summarizer. Write EXACTLY ONE objective, headline-style key point in few words. Return ONLY valid JSON: {{\"key_point\": \"<your single concise point>\"}}"
+onept_system_prompt = """You are a professional news summarizer.
+        Rules:
+        - headline-style bullet points but in few words and shorter lines
+        - Be factual and neutral: no opinions, hype, or analysis.
+        - Prioritize concrete outcomes, numbers, names, places, and dates.
+        - Use only information in the provided text; don't guess or add context.
+        - Use absolute dates as written; avoid 'today'/'yesterday'.
+        - Preserve proper nouns as written; expand acronyms only if expanded in the text.
+
+        DON'Ts (very important):
+        - Don't repeat facts or write near-duplicates; each bullet must cover a distinct facet.
+        - Don't add opinion, analysis, recommendations, or hype.
+        - Don't use info not in the text; no external context or guesses.
+        - Don't change numbers, units, currencies, names, or places; preserve as written.
+        - Don't merge multiple unrelated facts into one bullet; one idea per bullet.
+        - Don't use quotes, parentheses, emojis, hashtags, links, or markdown bullets.
+        - Don't alter capitalization of proper nouns or standardize terminology.
+        - Don't add any text outside the JSON; no extra keys, comments, or code fences.
+        - Don't include trailing commas or otherwise invalid JSON.
+ Return ONLY valid JSON: {{\"key_point\": \"<your single concise point>\"}}"""
+
 onept_user = "ARTICLE TEXT:```{article_text}```"
 onept_prompt = ChatPromptTemplate.from_messages([("system", onept_system_prompt), ("user", onept_user)])
 onept_parser = JsonOutputParser(pydantic_object=OnePointOut)
 one_point_chain = onept_prompt | llm_json | onept_parser
 
-# Per-Article Category
 class CategoryOut(BaseModel):
     category: str = Field(description="The primary category of the news article (e.g., 'Sports', 'Politics', 'Technology').")
-category_system_prompt = "You are a news classifier. From the article text, identify the single most relevant category (e.g., Sports, Politics, Business, Technology). Return ONLY valid JSON: {{\"category\": \"<your category>\"}}"
+category_system_prompt = """Assign the best-fitting category for the article.
+    Choose one of: Political, Business, Sports, Entertainment, Scientific, General.
+
+    Category definitions & signals:
+    - Political: government, elections, public policy, legislation, diplomacy, geopolitics, regulators acting in a policy role.
+    - Business: companies, markets, earnings, funding/M&A, corporate strategy, industry competition, jobs/layoffs (as business news).
+    - Sports: matches, athletes, leagues, scores, transfers, injuries, adventure sports. EXAMPLES: MOUNTAIN CLIMBING, BIKE RACING , ROCK CLIMBING, CLIMBING EVEREST
+    - Entertainment: films/TV/music/gaming/pop culture, celebrities, awards, box office, streaming releases.
+    - Scientific: research findings, peer-reviewed studies, experiments, space missions, medicine/biology/physics/CS as science.
+    - General: everything.
+
+ Return ONLY valid JSON: {{\"category\": \"<your category>\"}}"""
+
 category_user = "ARTICLE TEXT:```{article_text}```"
 category_prompt = ChatPromptTemplate.from_messages([("system", category_system_prompt), ("user", category_user)])
 category_parser = JsonOutputParser(pydantic_object=CategoryOut)
 category_chain = category_prompt | llm_json | category_parser
 
-# Per-Article Sentiment
 class SentimentOut(BaseModel):
     sentiment: str = Field(description="The overall sentiment of the article (e.g., 'Positive', 'Negative', 'Neutral').")
-sentiment_system_prompt = "You are a sentiment analyst. Determine the overall sentiment of the news article (Positive, Negative, or Neutral). Return ONLY valid JSON: {{\"sentiment\": \"<your sentiment>\"}}"
+sentiment_system_prompt = """Classify overall sentiment of the article content.
+        Return only one of: Positive, Negative, Neutral.
+       
+ Return ONLY valid JSON: {{\"sentiment\": \"<your sentiment>\"}}"""
 sentiment_user = "ARTICLE TEXT:```{article_text}```"
 sentiment_prompt = ChatPromptTemplate.from_messages([("system", sentiment_system_prompt), ("user", sentiment_user)])
 sentiment_parser = JsonOutputParser(pydantic_object=SentimentOut)
@@ -82,25 +112,18 @@ def run_analysis(sources: list, source_type: str) -> list:
 
     print(f"\nStarting analysis for {len(sources)} {source_type}(s)...")
     
-    # Build a parallel branch for each source dynamically
     branches = {}
     for i, src in enumerate(sources):
         branches[f"source_{i}"] = RunnableLambda(lambda x, s=src: analyze_source(s, source_type))
     
     parallel_runner = RunnableParallel(**branches)
     
-    # Invoke all branches at once
     analysis_results = parallel_runner.invoke({})
     
-    # The result is a dictionary like {'source_0': {...}, 'source_1': {...}}.
-    # We just want the list of result dictionaries.
+   
     return list(analysis_results.values())
 
 
-
-
-
-# ---------- Example main ----------
 if __name__ == "__main__":
     
     urls = [
@@ -122,7 +145,6 @@ if __name__ == "__main__":
     else:
         print(f"URL list is empty. Looking for .txt files in '{news_folder}' folder.")
         try:
-            # Dynamically find all .txt files in the specified folder
             sources_to_process = [
                 os.path.join(news_folder, f)
                 for f in os.listdir(news_folder)
@@ -133,7 +155,6 @@ if __name__ == "__main__":
             print(f"Error: The folder '{news_folder}' was not found.")
             sources_to_process = []
 
-    # --- Run the analysis if sources were found ---
     if not sources_to_process:
         print("\nNo articles to process. Please add URLs or create .txt files in the 'news' folder.")
     else:
