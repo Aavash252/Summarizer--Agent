@@ -107,21 +107,14 @@ def run_analysis(sources: list, source_type: str) -> list:
     if not sources:
         print("No sources to analyze.")
         return []
-
     print(f"\nStarting analysis for {len(sources)} {source_type}(s)...")
-    
     branches = {}
     for i, src in enumerate(sources):
         branches[f"source_{i}"] = RunnableLambda(lambda x, s=src: analyze_source(s, source_type))
-    
     parallel_runner = RunnableParallel(**branches)
-    
     analysis_results = parallel_runner.invoke({})
-    
     unordered_results = list(analysis_results.values())
-   
     source_order = {source_path: i for i, source_path in enumerate(sources)}
-    
     sorted_results = sorted(unordered_results, key=lambda res: source_order[res['source']])
     
     return sorted_results
