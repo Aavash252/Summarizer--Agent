@@ -91,7 +91,7 @@ def analyze_source(source: str, source_type: str) -> dict:
         sentiment_obj = result["sentiment"]
 
         return {
-            "source": source, # Keep track of where the data came from
+            "source": source,
             "key_point": key_point_obj.key_point if hasattr(key_point_obj, 'key_point') else key_point_obj.get('key_point', 'N/A'),
             "category": category_obj.category if hasattr(category_obj, 'category') else category_obj.get('category', 'N/A'),
             "sentiment": sentiment_obj.sentiment if hasattr(sentiment_obj, 'sentiment') else sentiment_obj.get('sentiment', 'N/A')
@@ -100,7 +100,6 @@ def analyze_source(source: str, source_type: str) -> dict:
         return {"source": source, "key_point": f"(Analysis failed: {e})", "category": "Error", "sentiment": "Error"}
 
 
-# --- NEW Generalized Orchestration Function ---
 def run_analysis(sources: list, source_type: str) -> list:
     """
     Runs the analysis in parallel for any number of sources and returns a list of results.
@@ -127,10 +126,6 @@ def run_analysis(sources: list, source_type: str) -> list:
     
     return sorted_results
     
-   
-    # return list(analysis_results.values())
-
-
 if __name__ == "__main__":
     
     urls = [
@@ -178,5 +173,5 @@ if __name__ == "__main__":
             print(f"- Category:  {p.get('category')}")
             print(f"- Sentiment: {p.get('sentiment')}")
 
-        print(f"\n⏱️ Total execution time: {end_time - start_time:.2f} seconds")
+        print(f"\n⏱ Total execution time: {end_time - start_time:.2f} seconds")
         write_summary_to_file(final_results,source_type)

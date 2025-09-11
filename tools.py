@@ -85,7 +85,6 @@ def write_summary_to_file(summary_list: list, source_type: str, output_filename:
             f.write(f"--- NEWS ANALYSIS REPORT ({len(summary_list)} ARTICLES) (Source: {source_type.upper()}) ---\n")
             
             for i, p in enumerate(summary_list, 1):
-                # Use os.path.basename to show a clean name for files
                 source_display = os.path.basename(p.get('source', 'N/A'))
                 f.write(f"\n--- Article {i} (Source: {source_display}) ---\n")
                 f.write(f"- Point:     {p.get('key_point', 'N/A')}\n")
