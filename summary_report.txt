@@ -5,17 +5,17 @@
 - Category:  Sports
 - Sentiment: Negative
 
---- Article 2 (Source: news3.txt) ---
-- Point:     Barcelona still have issues registering players within La Liga's salary limits
+--- Article 2 (Source: news2.txt) ---
+- Point:     Graham Potter stated West Ham is in pain after captain Jarrod Bowen apologized for confronting fans following a 3-2 EFL Cup loss to Wolves.
 - Category:  General
 - Sentiment: Negative
 
---- Article 3 (Source: news2.txt) ---
-- Point:     Graham Potter stated West Ham are 'in pain' and need unity after captain Jarrod Bowen apologised for confronting fans following a 3-2 EFL Cup loss to Wolves.
-- Category:  Sports
+--- Article 3 (Source: news3.txt) ---
+- Point:     Barcelona still have issues registering players within La Liga's salary limits as they are over their salary limit
+- Category:  General
 - Sentiment: Negative
 
 --- Article 4 (Source: news4.txt) ---
-- Point:     Liverpool manager Arne Slot stated he was unsure if he saw a football match during their 3-2 win over Newcastle United at St James' Park.
+- Point:     Liverpool manager Arne Slot stated he was unsure if he saw a football match after their 3-2 win over Newcastle United at St James' Park.
 - Category:  Sports
 - Sentiment: Negative

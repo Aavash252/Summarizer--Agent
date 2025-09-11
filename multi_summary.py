@@ -73,7 +73,6 @@ sentiment_chain = sentiment_prompt | llm_json | sentiment_parser
 # --- NEW Generalized Helper to analyze any source ---
 def analyze_source(source: str, source_type: str) -> dict:
     """Analyzes a single source (URL or file) and returns its analysis."""
-    # print(f"------ Analyzing {source_type} -------")
     if source_type == 'url':
         text = get_text_from_url(source)
     else: 
@@ -120,17 +119,28 @@ def run_analysis(sources: list, source_type: str) -> list:
     
     analysis_results = parallel_runner.invoke({})
     
+    unordered_results = list(analysis_results.values())
+    
+    # --- THIS IS THE KEY PART: SORT THE RESULTS ---
+    # Create a mapping of the source path to its original index
+    source_order = {source_path: i for i, source_path in enumerate(sources)}
+    
+    # Sort the results list based on the original index of its source
+    sorted_results = sorted(unordered_results, key=lambda res: source_order[res['source']])
+    
+    return sorted_results
+    
    
-    return list(analysis_results.values())
+    # return list(analysis_results.values())
 
 
 if __name__ == "__main__":
     
     urls = [
-    #     "https://www.bbc.com/sport/football/live/ce93m7rrzzvt",
-    #     "https://www.bbc.com/sport/football/articles/c4gljqwe5g8o",
-    #     "https://www.bbc.com/sport/football/articles/crmvygekeyzo",
-    #     "https://www.bbc.com/sport/football/articles/cjeyjwq9kkno", 
+        # "https://www.bbc.com/sport/football/live/ce93m7rrzzvt",
+        # "https://www.bbc.com/sport/football/articles/c4gljqwe5g8o",
+        # "https://www.bbc.com/sport/football/articles/crmvygekeyzo",
+        # "https://www.bbc.com/sport/football/articles/cjeyjwq9kkno", 
     ]
     
     news_folder = "news"
@@ -145,9 +155,10 @@ if __name__ == "__main__":
     else:
         print(f"URL list is empty. Looking for .txt files in '{news_folder}' folder.")
         try:
+            files = sorted(os.listdir(news_folder))
             sources_to_process = [
                 os.path.join(news_folder, f)
-                for f in os.listdir(news_folder)
+                for f in files
                 if f.endswith('.txt')
             ]
             source_type = "file"

@@ -10,14 +10,12 @@ def get_text_from_url(url: str) -> str:
         soup = BeautifulSoup(response.content, 'html.parser')
         publish_date = None
 
-        # 1. look for <time> tags with datetime attr
         time_tag = soup.find("time")
         if time_tag and time_tag.has_attr("datetime"):
             publish_date = time_tag["datetime"]
         elif time_tag:
             publish_date = time_tag.get_text(strip=True)
 
-        # 2. meta tags (common in news sites)
         if not publish_date:
             meta_date = soup.find("meta", {"property": "article:published_time"})
             if meta_date and meta_date.has_attr("content"):
@@ -61,12 +59,11 @@ def write_summary_to_file(filepaths: list, summary_points: list, output_filename
             for i, p in enumerate(summary_points, 1):
                 f.write(f"\n--- Article {i}---\n")
                 
-                # This logic handles both dictionaries and Pydantic objects
                 if isinstance(p, dict):
                     point = p.get('key_point', 'N/A')
                     category = p.get('category', 'N/A')
                     sentiment = p.get('sentiment', 'N/A')
-                else: # Pydantic model access
+                else: 
                     point = p.key_point
                     category = p.category
                     sentiment = p.sentiment
@@ -84,9 +81,7 @@ def write_summary_to_file(summary_list: list, source_type: str, output_filename:
     print(f"\nWriting summary to {output_filename}...")
     try:
         with open(output_filename, 'w', encoding='utf-8') as f:
-            # --- CHANGE IS HERE ---
-            # We use the new 'source_type' argument to create the dynamic title.
-            # .upper() makes it look clean (e.g., URL or FILE).
+           
             f.write(f"--- NEWS ANALYSIS REPORT ({len(summary_list)} ARTICLES) (Source: {source_type.upper()}) ---\n")
             
             for i, p in enumerate(summary_list, 1):
