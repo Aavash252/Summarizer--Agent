@@ -173,5 +173,5 @@ if __name__ == "__main__":
             print(f"- Category:  {p.get('category')}")
             print(f"- Sentiment: {p.get('sentiment')}")
 
-        print(f"\n⏱ Total execution time: {end_time - start_time:.2f} seconds")
+        print(f"\n Total execution time: {end_time - start_time:.2f} seconds")
         write_summary_to_file(final_results,source_type)
