@@ -1,5 +1,5 @@
 import os
-import re  # <-- 1. IMPORT THE REGEX LIBRARY
+import re  
 from typing import TypedDict
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
@@ -45,7 +45,7 @@ def draft_email_node(state: GraphState) -> dict:
     """
     Generates an email draft based on the current state and cleans the output.
     """
-    print("--- 📝 Drafting Email ---")
+    print("--- Drafting Email ---")
     revision_number = state["revision_number"]
 
     if revision_number == 0:
@@ -69,7 +69,7 @@ Please revise the following draft based on the user's feedback.
     # **THE FIX IS HERE:** Clean the raw output before saving it to the state.
     clean_draft = clean_llm_output(raw_draft)
 
-    print("--- ✅ Draft Complete ---")
+    print("--- Draft Complete ---")
     
     return {
         "draft_email": clean_draft,  # Use the cleaned draft
@@ -83,10 +83,10 @@ def request_human_review_node(state: GraphState) -> dict:
 # --- 5. Define the Conditional Edge Logic ---
 def should_continue(state: GraphState) -> str:
     if state["human_feedback"].lower() == "approve":
-        print("--- ✅ Email Approved by User ---")
+        print("---  Email Approved by User ---")
         return "end"
     else:
-        print("--- 🔄 Revising Draft Based on Feedback ---")
+        print("--- Revising Draft Based on Feedback ---")
         return "continue"
 
 # --- 6. Build and Compile the Graph ---
@@ -101,6 +101,23 @@ workflow.add_conditional_edges(
     {"continue": "draft_email", "end": END}
 )
 app = workflow.compile(interrupt_before=["human_review"])
+
+def save_email_to_file(topic: str, content: str):
+    """
+    Saves the final email content to a .txt file with a sanitized filename.
+    """
+    # Sanitize the topic to create a safe and valid filename
+    # Replaces spaces with underscores and removes characters that aren't letters, numbers, or underscores
+    sanitized_topic = re.sub(r'[^\w\s-]', '', topic).strip().replace(' ', '_')
+    filename = f"email_{sanitized_topic}.txt"
+    
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"\n Final email successfully saved to: {filename}")
+    except IOError as e:
+        print(f"\n Error: Could not save the file. Reason: {e}")
+
 
 # --- 7. The Main Application Loop ---
 if __name__ == "__main__":
@@ -131,6 +148,8 @@ if __name__ == "__main__":
 
         if feedback.lower() == "approve":
             print("\n🎉 Final email approved!")
+            save_email_to_file(topic, latest_draft)
+
             break
         
         current_state = result

@@ -1,5 +1,6 @@
 # --- imports ---
 import time
+from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
@@ -7,10 +8,47 @@ from langchain_core.runnables import RunnableParallel
 from langchain_ollama import ChatOllama
 from pydantic import BaseModel, Field
 from langgraph.graph import StateGraph, END
-from tools import get_text_from_url
+# from tools import get_text_from_url
+import requests
+
 
 # ---------------- Shared LLM ----------------
 llm_json = ChatOllama(model="qwen3:4b", format="json", temperature=0, streaming=True)
+
+
+def get_text_from_url(url: str) -> str:
+    """Fetches the clean text content from a given URL."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+        publish_date = None
+
+        time_tag = soup.find("time")
+        if time_tag and time_tag.has_attr("datetime"):
+            publish_date = time_tag["datetime"]
+        elif time_tag:
+            publish_date = time_tag.get_text(strip=True)
+
+        if not publish_date:
+            meta_date = soup.find("meta", {"property": "article:published_time"})
+            if meta_date and meta_date.has_attr("content"):
+                publish_date = meta_date["content"]
+
+        if not publish_date:
+            meta_date = soup.find("meta", {"name": "date"})
+            if meta_date and meta_date.has_attr("content"):
+                publish_date = meta_date["content"]
+    
+        paragraphs = soup.find_all('p')
+       
+        title = soup.title.string if soup.title else "Untitled"
+        article_text = ' '.join([p.get_text() for p in paragraphs])
+        return {"title": title,"date": publish_date if publish_date else "Date not found", "text": article_text}
+    except requests.RequestException as e:
+        return f"Error fetching URL: {e}"
+
+
 
 # ---------------- State Schema ----------------
 class ArticleState(BaseModel):

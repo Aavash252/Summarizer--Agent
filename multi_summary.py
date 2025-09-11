@@ -120,12 +120,9 @@ def run_analysis(sources: list, source_type: str) -> list:
     analysis_results = parallel_runner.invoke({})
     
     unordered_results = list(analysis_results.values())
-    
-    # --- THIS IS THE KEY PART: SORT THE RESULTS ---
-    # Create a mapping of the source path to its original index
+   
     source_order = {source_path: i for i, source_path in enumerate(sources)}
     
-    # Sort the results list based on the original index of its source
     sorted_results = sorted(unordered_results, key=lambda res: source_order[res['source']])
     
     return sorted_results
